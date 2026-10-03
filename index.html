@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>EduPlay - Educational Game Hub</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <h1>🎮 EduPlay</h1>
+
+    <h2>Learn. Play. Challenge.</h2>
+
+    <p>Welcome to your ultimate educational game hub!</p>
+
+    <hr>
+
+    <h2>🎯 Choose Your Game</h2>
+
+    <div class="games">
+
+        <!-- MATH QUEST -->
+
+        <div class="game-card">
+
+            <h3>🧮 Math Quest</h3>
+
+            <p>Test your mathematical skills!</p>
+
+            <a href="math.html">
+                <button>PLAY</button>
+            </a>
+
+        </div>
+
+
+        <!-- SCIENCE LAB -->
+
+        <div class="game-card">
+
+            <h3>🔬 Science Lab</h3>
+
+            <p>Explore the world of science!</p>
+
+            <a href="science.html">
+                <button>PLAY</button>
+            </a>
+
+        </div>
+
+
+        <!-- INDIA EXPLORER -->
+
+        <div class="game-card">
+
+            <h3>🇮🇳 India Explorer</h3>
+
+            <p>Discover India's states and culture!</p>
+
+            <a href="india.html">
+                <button>PLAY</button>
+            </a>
+
+        </div>
+
+
+        <!-- MYSTERY ACADEMY -->
+
+        <div class="game-card">
+
+            <h3>🕵️ Mystery Academy</h3>
+
+            <p>Use logic to solve mysteries!</p>
+
+            <a href="mystery.html">
+                <button>PLAY</button>
+            </a>
+
+        </div>
+
+    </div>
+
+    <hr>
+
+    <!-- PLAYER PROGRESS -->
+
+    <h2>🏆 Your Progress</h2>
+
+    <p id="homeXP">⭐ XP: 0</p>
+
+    <p id="homeLevel">🎮 Level: 1</p>
+
+
+    <div class="xp-container">
+
+        <div id="xpBar"></div>
+
+    </div>
+
+
+    <p id="xpProgress">
+        0 / 500 XP
+    </p>
+
+
+    <script>
+
+        let savedXP =
+            Number(localStorage.getItem("xp")) || 0;
+
+
+        let level =
+            Math.floor(savedXP / 500) + 1;
+
+
+        let currentLevelXP =
+            savedXP % 500;
+
+
+        let percentage =
+            (currentLevelXP / 500) * 100;
+
+
+        document.getElementById("homeXP").innerHTML =
+            "⭐ XP: " + savedXP;
+
+
+        document.getElementById("homeLevel").innerHTML =
+            "🎮 Level: " + level;
+
+
+        document.getElementById("xpBar").style.width =
+            percentage + "%";
+
+
+        document.getElementById("xpProgress").innerHTML =
+            currentLevelXP +
+            " / 500 XP";
+
+    </script>
+
+</body>
+
+</html>

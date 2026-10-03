@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Science Lab</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <h1>🔬 Science Lab</h1>
+
+    <a href="index.html">
+        <button>🏠 HOME</button>
+    </a>
+
+    <div class="game-info">
+        <div>⭐ XP <span id="score">0</span></div>
+        <div>❤️ <span id="lives">3</span></div>
+        <div>🔥 Streak <span id="streak">0</span></div>
+    </div>
+
+    <div id="timerBox">
+        <span>⏱️ TIME</span>
+        <strong id="timer">15</strong>
+    </div>
+
+    <div class="question-card">
+
+        <p id="questionNumber">Question 1 / 5</p>
+
+        <h2 id="question">Loading...</h2>
+
+        <div id="answers"></div>
+
+        <p id="result"></p>
+
+    </div>
+
+    <script>
+
+        let currentQuestion = 0;
+
+        let xp = Number(localStorage.getItem("xp")) || 0;
+
+        let lives = 3;
+
+        let streak = 0;
+
+        let timeLeft = 15;
+
+        let timer;
+
+        let answered = false;
+
+
+        const questions = [
+
+            {
+                question: "Which organ pumps blood around the body?",
+                answers: [
+                    "Lungs",
+                    "Heart",
+                    "Brain",
+                    "Stomach"
+                ],
+                correct: "Heart"
+            },
+
+            {
+                question: "What gas do plants take in during photosynthesis?",
+                answers: [
+                    "Oxygen",
+                    "Nitrogen",
+                    "Carbon dioxide",
+                    "Hydrogen"
+                ],
+                correct: "Carbon dioxide"
+            },
+
+            {
+                question: "What is the boiling point of water at sea level?",
+                answers: [
+                    "50°C",
+                    "75°C",
+                    "100°C",
+                    "150°C"
+                ],
+                correct: "100°C"
+            },
+
+            {
+                question: "Which planet is known as the Red Planet?",
+                answers: [
+                    "Venus",
+                    "Mars",
+                    "Jupiter",
+                    "Saturn"
+                ],
+                correct: "Mars"
+            },
+
+            {
+                question: "What force pulls objects toward Earth?",
+                answers: [
+                    "Friction",
+                    "Magnetism",
+                    "Gravity",
+                    "Electricity"
+                ],
+                correct: "Gravity"
+            }
+
+        ];
+
+
+        function updateInfo() {
+
+            document.getElementById("score").innerHTML = xp;
+
+            document.getElementById("lives").innerHTML =
+                "❤️".repeat(lives) +
+                "🖤".repeat(3 - lives);
+
+            document.getElementById("streak").innerHTML =
+                streak;
+
+        }
+
+
+        function startTimer() {
+
+            clearInterval(timer);
+
+            timeLeft = 15;
+
+            document.getElementById("timer").innerHTML =
+                timeLeft;
+
+            document.getElementById("timerBox")
+                .classList.remove("danger");
+
+            timer = setInterval(function() {
+
+                timeLeft--;
+
+                document.getElementById("timer").innerHTML =
+                    timeLeft;
+
+                if (timeLeft <= 5) {
+
+                    document.getElementById("timerBox")
+                        .classList.add("danger");
+
+                }
+
+                if (timeLeft <= 0) {
+
+                    clearInterval(timer);
+
+                    timeUp();
+
+                }
+
+            }, 1000);
+
+        }
+
+
+        function loadQuestion() {
+
+            if (currentQuestion >= questions.length) {
+
+                finishGame();
+
+                return;
+
+            }
+
+            answered = false;
+
+            let q = questions[currentQuestion];
+
+            document.getElementById("questionNumber").innerHTML =
+                "Question " +
+                (currentQuestion + 1) +
+                " / " +
+                questions.length;
+
+            document.getElementById("question").innerHTML =
+                q.question;
+
+            document.getElementById("result").innerHTML =
+                "";
+
+            let answerArea =
+                document.getElementById("answers");
+
+            answerArea.innerHTML =
+                "";
+
+            q.answers.forEach(function(answer) {
+
+                let button =
+                    document.createElement("button");
+
+                button.innerHTML =
+                    answer;
+
+                button.onclick =
+                    function() {
+
+                        checkAnswer(answer, button);
+
+                    };
+
+                answerArea.appendChild(button);
+
+            });
+
+            startTimer();
+
+        }
+
+
+        function checkAnswer(answer, selectedButton) {
+
+            if (answered) {
+                return;
+            }
+
+            answered = true;
+
+            clearInterval(timer);
+
+            let q = questions[currentQuestion];
+
+            let buttons =
+                document.querySelectorAll("#answers button");
+
+            buttons.forEach(function(button) {
+
+                button.disabled = true;
+
+            });
+
+
+            if (answer === q.correct) {
+
+                streak++;
+
+                let earnedXP =
+                    100 + (streak - 1) * 25;
+
+                xp += earnedXP;
+
+                localStorage.setItem("xp", xp);
+
+                selectedButton.classList.add("correct");
+
+                document.getElementById("result").innerHTML =
+                    "✅ Correct! +" +
+                    earnedXP +
+                    " XP";
+
+            } else {
+
+                lives--;
+
+                streak = 0;
+
+                selectedButton.classList.add("wrong");
+
+                document.getElementById("result").innerHTML =
+                    "❌ Wrong!";
+
+            }
+
+
+            updateInfo();
+
+
+            if (lives <= 0) {
+
+                setTimeout(function() {
+
+                    gameOver();
+
+                }, 1000);
+
+                return;
+
+            }
+
+
+            currentQuestion++;
+
+
+            setTimeout(function() {
+
+                loadQuestion();
+
+            }, 1000);
+
+        }
+
+
+        function timeUp() {
+
+            if (answered) {
+                return;
+            }
+
+            answered = true;
+
+            lives--;
+
+            streak = 0;
+
+            document.getElementById("result").innerHTML =
+                "⏰ Time's up!";
+
+            updateInfo();
+
+
+            if (lives <= 0) {
+
+                setTimeout(function() {
+
+                    gameOver();
+
+                }, 1000);
+
+                return;
+
+            }
+
+
+            currentQuestion++;
+
+
+            setTimeout(function() {
+
+                loadQuestion();
+
+            }, 1000);
+
+        }
+
+
+        function gameOver() {
+
+            clearInterval(timer);
+
+            document.getElementById("timer").innerHTML =
+                "0";
+
+            document.getElementById("questionNumber").innerHTML =
+                "GAME OVER";
+
+            document.getElementById("question").innerHTML =
+                "💀 Game Over!";
+
+            document.getElementById("answers").innerHTML =
+                "<button onclick='restartGame()'>🔄 PLAY AGAIN</button>";
+
+            document.getElementById("result").innerHTML =
+                "⭐ Final XP: " + xp;
+
+        }
+
+
+        function finishGame() {
+
+            clearInterval(timer);
+
+            document.getElementById("timer").innerHTML =
+                "✓";
+
+            document.getElementById("questionNumber").innerHTML =
+                "LAB COMPLETE";
+
+            document.getElementById("question").innerHTML =
+                "🏆 Science Lab Complete!";
+
+            document.getElementById("answers").innerHTML =
+                "<button onclick='restartGame()'>🔄 PLAY AGAIN</button>";
+
+            document.getElementById("result").innerHTML =
+                "⭐ Final XP: " + xp;
+
+        }
+
+
+        function restartGame() {
+
+            currentQuestion = 0;
+
+            lives = 3;
+
+            streak = 0;
+
+            answered = false;
+
+            updateInfo();
+
+            loadQuestion();
+
+        }
+
+
+        updateInfo();
+
+        loadQuestion();
+
+    </script>
+
+</body>
+
+</html>

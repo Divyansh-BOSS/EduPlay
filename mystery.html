@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Mystery Academy</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <h1>🕵️ Mystery Academy</h1>
+
+    <a href="index.html">
+        <button>🏠 HOME</button>
+    </a>
+
+    <div class="game-info">
+        <div>⭐ XP <span id="score">0</span></div>
+        <div>❤️ <span id="lives">3</span></div>
+        <div>🔥 Streak <span id="streak">0</span></div>
+    </div>
+
+    <div id="timerBox">
+        <span>⏱️ TIME</span>
+        <strong id="timer">15</strong>
+    </div>
+
+    <div class="question-card">
+
+        <p id="questionNumber">Case 1 / 5</p>
+
+        <h2 id="question">Loading...</h2>
+
+        <div id="answers"></div>
+
+        <p id="result"></p>
+
+    </div>
+
+    <script>
+
+        let currentQuestion = 0;
+
+        let xp = Number(localStorage.getItem("xp")) || 0;
+
+        let lives = 3;
+
+        let streak = 0;
+
+        let timeLeft = 15;
+
+        let timer;
+
+        let answered = false;
+
+
+        const questions = [
+
+            {
+                question: "A detective finds a wet umbrella inside a room. What can this most likely suggest?",
+                answers: [
+                    "It was raining outside",
+                    "It was snowing",
+                    "It was extremely hot",
+                    "It was midnight"
+                ],
+                correct: "It was raining outside"
+            },
+
+            {
+                question: "What comes next? 2, 4, 8, 16, ?",
+                answers: [
+                    "20",
+                    "24",
+                    "32",
+                    "36"
+                ],
+                correct: "32"
+            },
+
+            {
+                question: "A clock shows 3:00. What angle is between the hour and minute hands?",
+                answers: [
+                    "45°",
+                    "90°",
+                    "120°",
+                    "180°"
+                ],
+                correct: "90°"
+            },
+
+            {
+                question: "If all cats are animals and Luna is a cat, what must be true?",
+                answers: [
+                    "Luna is an animal",
+                    "Luna is a bird",
+                    "All animals are cats",
+                    "Luna cannot move"
+                ],
+                correct: "Luna is an animal"
+            },
+
+            {
+                question: "Which number does NOT belong? 3, 6, 9, 12, 14, 15",
+                answers: [
+                    "6",
+                    "9",
+                    "14",
+                    "15"
+                ],
+                correct: "14"
+            }
+
+        ];
+
+
+        function updateInfo() {
+
+            document.getElementById("score").innerHTML =
+                xp;
+
+            document.getElementById("lives").innerHTML =
+                "❤️".repeat(lives) +
+                "🖤".repeat(3 - lives);
+
+            document.getElementById("streak").innerHTML =
+                streak;
+
+        }
+
+
+        function startTimer() {
+
+            clearInterval(timer);
+
+            timeLeft = 15;
+
+            document.getElementById("timer").innerHTML =
+                timeLeft;
+
+            document.getElementById("timerBox")
+                .classList.remove("danger");
+
+            timer = setInterval(function() {
+
+                timeLeft--;
+
+                document.getElementById("timer").innerHTML =
+                    timeLeft;
+
+                if (timeLeft <= 5) {
+
+                    document.getElementById("timerBox")
+                        .classList.add("danger");
+
+                }
+
+                if (timeLeft <= 0) {
+
+                    clearInterval(timer);
+
+                    timeUp();
+
+                }
+
+            }, 1000);
+
+        }
+
+
+        function loadQuestion() {
+
+            if (currentQuestion >= questions.length) {
+
+                finishGame();
+
+                return;
+
+            }
+
+            answered = false;
+
+            let q =
+                questions[currentQuestion];
+
+            document.getElementById("questionNumber").innerHTML =
+                "Case " +
+                (currentQuestion + 1) +
+                " / " +
+                questions.length;
+
+            document.getElementById("question").innerHTML =
+                q.question;
+
+            document.getElementById("result").innerHTML =
+                "";
+
+            let answerArea =
+                document.getElementById("answers");
+
+            answerArea.innerHTML =
+                "";
+
+            q.answers.forEach(function(answer) {
+
+                let button =
+                    document.createElement("button");
+
+                button.innerHTML =
+                    answer;
+
+                button.onclick =
+                    function() {
+
+                        checkAnswer(answer, button);
+
+                    };
+
+                answerArea.appendChild(button);
+
+            });
+
+            startTimer();
+
+        }
+
+
+        function checkAnswer(answer, selectedButton) {
+
+            if (answered) {
+                return;
+            }
+
+            answered = true;
+
+            clearInterval(timer);
+
+            let q =
+                questions[currentQuestion];
+
+            let buttons =
+                document.querySelectorAll("#answers button");
+
+            buttons.forEach(function(button) {
+
+                button.disabled = true;
+
+            });
+
+
+            if (answer === q.correct) {
+
+                streak++;
+
+                let earnedXP =
+                    100 + (streak - 1) * 25;
+
+                xp += earnedXP;
+
+                localStorage.setItem("xp", xp);
+
+                selectedButton.classList.add("correct");
+
+                document.getElementById("result").innerHTML =
+                    "🔎 Case solved! +" +
+                    earnedXP +
+                    " XP";
+
+            } else {
+
+                lives--;
+
+                streak = 0;
+
+                selectedButton.classList.add("wrong");
+
+                document.getElementById("result").innerHTML =
+                    "❌ Wrong clue!";
+
+            }
+
+
+            updateInfo();
+
+
+            if (lives <= 0) {
+
+                setTimeout(function() {
+
+                    gameOver();
+
+                }, 1000);
+
+                return;
+
+            }
+
+
+            currentQuestion++;
+
+
+            setTimeout(function() {
+
+                loadQuestion();
+
+            }, 1000);
+
+        }
+
+
+        function timeUp() {
+
+            if (answered) {
+                return;
+            }
+
+            answered = true;
+
+            lives--;
+
+            streak = 0;
+
+            document.getElementById("result").innerHTML =
+                "⏰ You ran out of time!";
+
+            updateInfo();
+
+
+            if (lives <= 0) {
+
+                setTimeout(function() {
+
+                    gameOver();
+
+                }, 1000);
+
+                return;
+
+            }
+
+
+            currentQuestion++;
+
+
+            setTimeout(function() {
+
+                loadQuestion();
+
+            }, 1000);
+
+        }
+
+
+        function gameOver() {
+
+            clearInterval(timer);
+
+            document.getElementById("timer").innerHTML =
+                "0";
+
+            document.getElementById("questionNumber").innerHTML =
+                "CASE CLOSED";
+
+            document.getElementById("question").innerHTML =
+                "💀 Mystery Unsolved!";
+
+            document.getElementById("answers").innerHTML =
+                "<button onclick='restartGame()'>🔄 TRY AGAIN</button>";
+
+            document.getElementById("result").innerHTML =
+                "⭐ Final XP: " + xp;
+
+        }
+
+
+        function finishGame() {
+
+            clearInterval(timer);
+
+            document.getElementById("timer").innerHTML =
+                "✓";
+
+            document.getElementById("questionNumber").innerHTML =
+                "ALL CASES SOLVED";
+
+            document.getElementById("question").innerHTML =
+                "🏆 Detective Master!";
+
+            document.getElementById("answers").innerHTML =
+                "<button onclick='restartGame()'>🔄 PLAY AGAIN</button>";
+
+            document.getElementById("result").innerHTML =
+                "⭐ Final XP: " + xp;
+
+        }
+
+
+        function restartGame() {
+
+            currentQuestion = 0;
+
+            lives = 3;
+
+            streak = 0;
+
+            answered = false;
+
+            updateInfo();
+
+            loadQuestion();
+
+        }
+
+
+        updateInfo();
+
+        loadQuestion();
+
+    </script>
+
+</body>
+
+</html>
